@@ -1,5 +1,4 @@
 import {workspace, Neovim, FloatBuffer} from 'coc.nvim'
-import {TaskInput} from './taskinput'
 
 export default class AsyncTasks {
 

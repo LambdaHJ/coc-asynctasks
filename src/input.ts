@@ -16,7 +16,7 @@ import {
 import { BaseComponent } from './Base';
 
 export namespace Input {
-  export interface Options<Value> {
+  export interface Options {
     title?: string;
     /**
      * @default true
@@ -32,7 +32,7 @@ export namespace Input {
      */
     width?: number;
     prompt?: string;
-    defaultValue?: Value;
+    defaultValue?: string;
     completion?: {
       short: string;
       provider: CompletionItemProvider;
@@ -42,30 +42,23 @@ export namespace Input {
 
 type Instance = MultiFloatingWindow<'prompt' | 'input'>;
 
-export abstract class Input<Value> extends BaseComponent<
+export class Input extends BaseComponent<
   Instance,
-  Input.Options<Value>,
-  Value
+  Input.Options,
+  string
 > {
   protected static maxId = 0;
   protected static actionCmd = 'floatinput.input.action_' + versionName;
   protected static inputMap: Map<
     number,
     {
-      input: Input<any>;
+      input: Input;
       instance: Instance;
       inputWin: FloatingWindow;
     }
   > = new Map();
   protected static _inited = false;
 
-  protected abstract async defaultString(): Promise<string>;
-
-  protected abstract async valueToString(value: Value): Promise<string>;
-
-  protected abstract async stringToValue(str: string): Promise<Value>;
-
-  protected abstract async validateContent(str: string): Promise<boolean>;
 
   protected completionDisposable?: Disposable;
   protected id = 0;
@@ -120,7 +113,7 @@ export abstract class Input<Value> extends BaseComponent<
         if (it) {
           return;
         }
-        const openedInputs: Input<any>[] = [];
+        const openedInputs: Input[] = [];
         for (const it of Input.inputMap.values()) {
           if (await it.input.opened()) {
             openedInputs.push(it.input);
@@ -216,7 +209,7 @@ export abstract class Input<Value> extends BaseComponent<
   }
 
   protected async getFinalOpenOptions(
-    options: Input.Options<Value>,
+    options: Input.Options,
     instance: Instance,
     type: 'open' | 'resize',
     mode: MapMode = 'n',
@@ -304,13 +297,13 @@ export abstract class Input<Value> extends BaseComponent<
     return finalOptions;
   }
 
-  protected async _open(instance: Instance, options: Input.Options<Value>) {
+  protected async _open(instance: Instance, options: Input.Options) {
     await instance.open(
       await this.getFinalOpenOptions(options, instance, 'open'),
     );
   }
 
-  protected async _resize(instance: Instance, options: Input.Options<Value>) {
+  protected async _resize(instance: Instance, options: Input.Options) {
     await instance.resize(
       await this.getFinalOpenOptions(options, instance, 'resize'),
     );
@@ -318,5 +311,21 @@ export abstract class Input<Value> extends BaseComponent<
 
   protected async _close(instance: Instance) {
     await instance.close();
+  }
+
+  protected async defaultString(): Promise<string> {
+    return '';
+  }
+
+  protected async valueToString(value: string): Promise<string> {
+    return value;
+  }
+
+  protected async stringToValue(str: string): Promise<string> {
+    return str;
+  }
+
+  protected async validateContent(_str: string): Promise<boolean> {
+    return true;
   }
 }
