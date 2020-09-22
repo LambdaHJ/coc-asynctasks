@@ -48,7 +48,7 @@ export class Input extends BaseComponent<
   string
 > {
   protected static maxId = 0;
-  protected static actionCmd = 'floatinput.input.action_' + versionName;
+  protected static actionCmd = 'asynctasks.action_' + versionName;
   protected static inputMap: Map<
     number,
     {
@@ -63,7 +63,7 @@ export class Input extends BaseComponent<
   protected completionDisposable?: Disposable;
   protected id = 0;
   protected genFiletype() {
-    return 'coc-floatinput-input-' + this.id;
+    return 'asynctasks-' + this.id;
   }
 
   protected async changeMode(mode: MapMode, targetMode: MapMode) {

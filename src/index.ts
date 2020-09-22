@@ -3,7 +3,7 @@ import {activateHelper} from 'coc-helper';
 import Tasks from './tasks'
 import {Input} from './input'
 import AsyncTasks from './command'
-import {TaskProvider} from './list'
+import {TaskProvider} from './provider'
 
 
 export async function activate(context: ExtensionContext): Promise<void> {
@@ -17,17 +17,16 @@ export async function activate(context: ExtensionContext): Promise<void> {
 			const content = await input.input({
 				title: 'task',
 				relative: 'center',
-				filetype: 'floatinput-task',
+				filetype: 'asynctasks-task',
 				completion: {
 					short: "C",
-					provider: new TaskProvider(),
+					provider: new TaskProvider(workspace.nvim),
 				}
-
 			})
 			if (!content) {
 				return;
 			}
-			
+			workspace.showMessage("-----------------"+ content.toString())	
 			cmd.run(content.toString())
 		}),
 		commands.registerCommand("task.edit", async () => cmd.edit()),

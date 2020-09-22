@@ -15,12 +15,13 @@ export default class Tasks extends BasicList {
 	public readonly description = 'CocList for asynctasks.vim'
 	public readonly defaultAction = 'run'
 	public actions: ListAction[] = []
+	ins: Asynctasks
 
 	constructor(nvim: Neovim) {
 		super(nvim)
+		this.ins = Asynctasks.getInstance()
 
 		this.addLocationActions()
-
 		this.addAction('run', (item: ListItem) => {
 			this.nvim.command(`AsyncTask ${item.data.name}`, true)
 		})
@@ -28,13 +29,11 @@ export default class Tasks extends BasicList {
 
 	public async loadItems(_context: ListContext): Promise<ListItem[]> {
 		const source: ListItem[] = []
-
-		const ins = Asynctasks.getInstance()
-		const tasks = await ins.LoadItems(this.nvim)
+		const tasks = await this.ins.LoadItems(this.nvim)
 		for (const task of tasks) {
 			if (/^\./.test(task.name)) continue
 			source.push({
-				label: "${task.name.padEnd(25)}" + "<${task.scope}>".padEnd(10) + ":  ${task.command}",
+				label: `${task.name.padEnd(25)}` + `<${task.scope}>`.padEnd(10) + `:  ${task.command}`,
 				data: task,
 				filterText: task.name,
 				location: Uri.file(task.source).toString()

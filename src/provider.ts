@@ -1,4 +1,5 @@
 import {
+	Neovim,
 	CompletionItemProvider,
 	workspace,
 	commands,
@@ -21,7 +22,7 @@ type ListItem = {name: string; kind?: CompletionItemKind};
 export abstract class ListProvider implements CompletionItemProvider {
 	abstract getList(prefix: string): Promise<ListItem[]>;
 
-	completionKind: CompletionItemKind = CompletionItemKind.Method;
+	completionKind: CompletionItemKind = CompletionItemKind.EnumMember
 
 	async provideCompletionItems(
 		document: TextDocument,
@@ -30,6 +31,7 @@ export abstract class ListProvider implements CompletionItemProvider {
 		const currentLine = document.getText(
 			Range.create(Position.create(position.line, 0), position),
 		);
+		workspace.showMessage("-----dddd-------" + currentLine)
 		const list = await this.getList(currentLine);
 		return list.map((l) => ({
 			label: l.name,
@@ -40,14 +42,19 @@ export abstract class ListProvider implements CompletionItemProvider {
 }
 
 export class TaskProvider extends ListProvider {
-	constructor() {
+	ins: AsyncTasks;
+	nvim: Neovim;
+	constructor(nvim: Neovim) {
 		super();
+		workspace.showMessage("------------")
+		this.ins = AsyncTasks.getInstance()
+		this.nvim = nvim
 	}
 	async getList(prefix: string): Promise<ListItem[]> {
-		const ins = AsyncTasks.getInstance()
-		const ts = await ins.LoadItems(workspace.nvim)
-		return ts.map((item)=>({
+		const ts = await this.ins.LoadItems(this.nvim)
+		workspace.showMessage("------------"+prefix)
+		return ts.map((item) => ({
 			name: item.name,
-		}))
+		})).filter((item) => item.name.startsWith(prefix))
 	}
 }
